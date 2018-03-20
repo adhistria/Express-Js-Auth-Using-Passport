@@ -3,6 +3,7 @@ const router = express.Router();
 const jwt = require('jsonwebtoken');
 const passport = require('passport');
 var bodyParser = require('body-parser');
+const User = require('./../Model/User');
 router.use(bodyParser.urlencoded({extended: true}));
 router.use(bodyParser.json());
 // const bodyParser = require('body-parser')
@@ -64,29 +65,45 @@ router.post('/login', function(req,res,next){
       res.send(err);
     }
     // const token = jwt.sign({foo:'bar'} , 'secret');
-    return res.json({ token: jwt.sign({id: user.id}, 'secret',{expiresIn: 3600} ) });
+    var token = jwt.sign({_id: user._id, username: user.email }, 'secret', {
+  expiresIn: 10080 });
+    console.log('123123');
+    console.log(user._id);
+    console.log(user.email);
+    console.log(token);
+    return res.json(token);
+    // return res.json({ token: jwt.sign({id: user.id}, 'secret',{expiresIn: 3600} ) });
 
-    // const token = jwt.sign({data: user}, {
-    //      expiresIn: 604800 // 1 week
-    //    });
-    //
-    //    res.json({
-    //      success: true,
-    //      token: `Bearer ${token}`,
-    //      user: {
-    //        id: user._id,
-    //        name: user.name,
-    //        username: user.username,
-    //        email: user.email
-    //      }
-    //    });
-    // console.log('asdasd boy');
-    // return res.json({user});
-    // return res.json({user,token});
+
   });
 
 })(req,res);
 });
+
+// router.post('/login', function(req, res) {
+//     User.findOne({
+//       email: req.body.email
+//     }, function(err, user) {
+//       if (err) throw err;
+//
+//       if (!user) {
+//         res.send({ success: false, response: 'Authentication failed. User not found.' });
+//       } else {
+//         // Check if password matches
+//         user.comparePassword(req.body.password, function(err, isMatch) {
+//           if (isMatch && !err) {
+//             // Create token if the password matched and no error was thrown
+//             var token = jwt.sign({id: user._id, username: user.username }, config.secret, {
+//               expiresIn: 10080 // in seconds
+//             });
+//             res.json({ success: true, response: 'Authentication succeeded! User found.', token: 'JWT ' + token});
+//           } else {
+//             res.send({ success: false, response: 'Authentication failed. Passwords did not match.' });
+//           }
+//         });
+//       }
+//     });
+//   });
 
 // router.post('/', (req, res, next) => {
 //   const username = req.body.username;
