@@ -1,10 +1,38 @@
 var express = require('express');
 var router= express.Router();
+const jwt = require('jsonwebtoken');
+const passport = require('passport');
 var bodyParser = require('body-parser');
 router.use(bodyParser.urlencoded({extended: true}));
 router.use(bodyParser.json());
 var User = require('./../Model/User');
-router.post('/',function(req,res){
+exports.authUser = function(req,res,next){
+  passport.authenticate('local', { session : false }, function (err,user,info){
+    if(err || !user){
+      console.log(err);
+      return res.status(400).json({
+        message : ('Something Wrong When Login'),
+        user : user,
+        err : err
+      });
+    }
+    req.login(user,{session : false},function (err){
+      if(err){
+        res.send(err);
+      }
+      // const token = jwt.sign({foo:'bar'} , 'secret');
+      var token = jwt.sign({_id: user._id, username: user.email }, 'secret', {
+    expiresIn: 10080 });
+      console.log('123123');
+      console.log(user._id);
+      console.log(user.email);
+      console.log(token);
+      return res.json(token);
+      // return res.json({ token: jwt.sign({id: user.id}, 'secret',{expiresIn: 3600} ) });
+    });
+  })(req,res);
+};
+exports.registerUser = function(req,res){
   console.log(req.body.name);
   console.log(req.body.email);
   console.log(req.body.password);
@@ -38,7 +66,7 @@ router.post('/',function(req,res){
     }else{
       res.status(400).send('Error');
     }
-  });
+  };
 // router.post('/login',function(req,res,next){
 //   if(req.body.email && req.body.password){
 //     User.authenticate(req.body.email , req.body.password, function(err,user){
@@ -61,10 +89,13 @@ router.post('/',function(req,res){
 //     res.status(200).send(user);
 //   });
 // });
-router.get('/',function(req,res){
-  User.find({},function(err,users){
-    if(err) return res.status(500).send('Ada masalah cuy');
-    res.status(200).send(users);
-  });
-});
-module.exports = router;
+
+
+
+// router.get('/',function(req,res){
+//   User.find({},function(err,users){
+//     if(err) return res.status(500).send('Ada masalah cuy');
+//     res.status(200).send(users);
+//   });
+// });
+// module.exports = router;
